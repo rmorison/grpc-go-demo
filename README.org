@@ -57,5 +57,6 @@
 #+begin_src bash
   make distclean tools  # only needed once, force rebuild of toolchain jic
   make
-  ls -l examples/helloworld/helloworld
+  ls -l examples/helloworld/helloworld  # should see new timestamps on the go files
+  git diff  # note the updated codegen of go files, and the new requires in tools.go.mod
 #+end_src
