@@ -1,0 +1,43 @@
+* Repo construction breadcrumbs
+
+  Notes from the construction of this repo. (It may be instructive to
+  rebuild a repo like this from scratch.)
+
+** Part 1: Setup project, build tools, cli commands
+
+*** Init module
+
+#+begin_src bash
+  mkdir grpc-go-demo
+  cd grpc-go-demo
+  git init
+  go mod init github.com/rmorison/grpc-go-demo
+#+end_src
+
+*** Get gitignore, makefiles & build tools
+#+begin_src bash
+  curl https://raw.githubusercontent.com/rmorison/techdocs/main/gitignore-sample --output .gitignore
+  curl https://raw.githubusercontent.com/rmorison/techdocs/main/build-tech/Makefile.proto.builder --output Makefile
+  curl https://raw.githubusercontent.com/rmorison/techdocs/main/build-tech/Makefile.proto.tools --output tools/Makefile --create-dirs
+  curl https://raw.githubusercontent.com/rmorison/techdocs/main/build-tech/tools.proto.go --output tools/tools.go
+  (cd tools && go mod init github.com/rmorison/grpc-go-demo/tools)
+#+end_src
+
+*** Install Cobra, add cli commands for greeter
+
+#+begin_src bash
+  go install github.com/spf13/cobra/cobra@latest
+  cobra init
+  cobra add greeter
+  cobra add server -p greeterCmd
+  cobra add client -p greeterCmd
+  go run main.go --help
+  go run main.go greeter --help
+#+end_src
+
+*** Initial commit
+
+#+begin_src bash
+  git add .
+  git commit -m 'Genesis: Cobra generated Go program with greeter subcommand, protoc build tools'
+#+end_src
