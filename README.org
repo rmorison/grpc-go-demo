@@ -41,3 +41,21 @@
   git add .
   git commit -m 'Genesis: Cobra generated Go program with greeter subcommand, protoc build tools'
 #+end_src
+
+** Part 2 Get helloworld code
+
+*** Get and commit helloworld files
+
+#+begin_src bash
+  curl https://codeload.github.com/grpc/grpc-go/tar.gz/refs/tags/v1.43.0 --output - | tar --wildcards --strip-components=1 -xvzf - \*/helloworld
+  git add examples
+  git commit -m 'helloworld example from https://github.com/grpc/grpc-go/tree/master/examples/helloworld'
+#+end_src
+
+*** Build helloworld proto
+
+#+begin_src bash
+  make distclean tools  # only needed once, force rebuild of toolchain jic
+  make
+  ls -l examples/helloworld/helloworld
+#+end_src
