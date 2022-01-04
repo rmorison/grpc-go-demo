@@ -58,5 +58,150 @@
   make distclean tools  # only needed once, force rebuild of toolchain jic
   make
   ls -l examples/helloworld/helloworld  # should see new timestamps on the go files
-  git diff  # note the updated codegen of go files, and the new requires in tools.go.mod
+  git diff  # note the updated codegen of go files
+#+end_src
+
+*** Edit greeter_server and greeter_client source
+
+    ...so we can import them into our Cobra command files, give each
+    it's own package name, update the ~pb~ path, and change ~main~ to
+    exportable names.
+
+#+begin_src diff
+diff --git a/examples/helloworld/greeter_client/main.go b/examples/helloworld/greeter_client/main.go
+index b27b7da..147031b 100644
+--- a/examples/helloworld/greeter_client/main.go
++++ b/examples/helloworld/greeter_client/main.go
+@@ -17,7 +17,7 @@
+  */
+
+ // Package main implements a client for Greeter service.
+-package main
++package greeter_client
+
+ import (
+ 	"context"
+@@ -25,8 +25,8 @@ import (
+ 	"log"
+ 	"time"
+
++	pb "github.com/rmorison/grpc-go-demo/examples/helloworld/helloworld"
+ 	"google.golang.org/grpc"
+-	pb "google.golang.org/grpc/examples/helloworld/helloworld"
+ )
+
+ const (
+@@ -38,7 +38,7 @@ var (
+ 	name = flag.String("name", defaultName, "Name to greet")
+ )
+
+-func main() {
++func Greet() {
+ 	flag.Parse()
+ 	// Set up a connection to the server.
+ 	conn, err := grpc.Dial(*addr, grpc.WithInsecure())
+diff --git a/examples/helloworld/greeter_server/main.go b/examples/helloworld/greeter_server/main.go
+index 728bb19..54792e4 100644
+--- a/examples/helloworld/greeter_server/main.go
++++ b/examples/helloworld/greeter_server/main.go
+@@ -17,7 +17,7 @@
+  */
+
+ // Package main implements a server for Greeter service.
+-package main
++package greeter_server
+
+ import (
+ 	"context"
+@@ -26,8 +26,8 @@ import (
+ 	"log"
+ 	"net"
+
++	pb "github.com/rmorison/grpc-go-demo/examples/helloworld/helloworld"
+ 	"google.golang.org/grpc"
+-	pb "google.golang.org/grpc/examples/helloworld/helloworld"
+ )
+
+ var (
+@@ -45,7 +45,7 @@ func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloRe
+ 	return &pb.HelloReply{Message: "Hello " + in.GetName()}, nil
+ }
+
+-func main() {
++func ServeGreetings() {
+ 	flag.Parse()
+ 	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", *port))
+ 	if err != nil {
+#+end_src
+
+*** Update the Cobra server and client commands
+
+#+begin_src diff
+diff --git a/cmd/client.go b/cmd/client.go
+index 83377af..cfe8bdf 100644
+--- a/cmd/client.go
++++ b/cmd/client.go
+@@ -5,8 +5,7 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
+ package cmd
+
+ import (
+-	"fmt"
+-
++	"github.com/rmorison/grpc-go-demo/examples/helloworld/greeter_client"
+ 	"github.com/spf13/cobra"
+ )
+
+@@ -21,7 +20,7 @@ Cobra is a CLI library for Go that empowers applications.
+ This application is a tool to generate the needed files
+ to quickly create a Cobra application.`,
+ 	Run: func(cmd *cobra.Command, args []string) {
+-		fmt.Println("client called")
++		greeter_client.Greet()
+ 	},
+ }
+
+diff --git a/cmd/server.go b/cmd/server.go
+index 904d94f..dd2d977 100644
+--- a/cmd/server.go
++++ b/cmd/server.go
+@@ -5,8 +5,7 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
+ package cmd
+
+ import (
+-	"fmt"
+-
++	"github.com/rmorison/grpc-go-demo/examples/helloworld/greeter_server"
+ 	"github.com/spf13/cobra"
+ )
+
+@@ -21,7 +20,7 @@ Cobra is a CLI library for Go that empowers applications.
+ This application is a tool to generate the needed files
+ to quickly create a Cobra application.`,
+ 	Run: func(cmd *cobra.Command, args []string) {
+-		fmt.Println("server called")
++		greeter_server.ServeGreetings()
+ 	},
+ }
+
+#+end_src
+
+
+*** Run the server
+
+#+begin_src bash
+/Projects/rmorison/grpc-go-demo$ go run main.go greeter server
+2022/01/03 22:51:41 server listening at 127.0.0.1:50051
+#+end_src
+
+*** Run the client
+
+#+begin_src bash
+~/Projects/rmorison/grpc-go-demo$ go run main.go greeter client
+2022/01/03 22:48:00 Greeting: Hello world
+#+end_src
+
+*** Check the server
+
+#+begin_src bash
+2022/01/03 22:48:00 Received: world
 #+end_src

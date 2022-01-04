@@ -17,7 +17,7 @@
  */
 
 // Package main implements a server for Greeter service.
-package main
+package greeter_server
 
 import (
 	"context"
@@ -26,8 +26,8 @@ import (
 	"log"
 	"net"
 
+	pb "github.com/rmorison/grpc-go-demo/examples/helloworld/helloworld"
 	"google.golang.org/grpc"
-	pb "google.golang.org/grpc/examples/helloworld/helloworld"
 )
 
 var (
@@ -45,7 +45,7 @@ func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloRe
 	return &pb.HelloReply{Message: "Hello " + in.GetName()}, nil
 }
 
-func main() {
+func ServeGreetings() {
 	flag.Parse()
 	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", *port))
 	if err != nil {
